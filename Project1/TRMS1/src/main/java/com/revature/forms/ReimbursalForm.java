@@ -11,7 +11,6 @@ public class ReimbursalForm {
 	private String     description;   // Some message 
 	private String     courseType;    // University/Seminar/Certification
 	private String     message;       // for manager to respond
-	private LocalDate  submitTime;    // auto computed time of submission
 
 	
 	public ReimbursalForm() {
@@ -20,7 +19,7 @@ public class ReimbursalForm {
 	
 	public ReimbursalForm(Integer empId, Double percentage, Double paidTuition,
 			              String manager, MarkSheet markSheet, String description, 
-			              String courseType, String message, LocalDate submitTime) {
+			              String courseType, String message) {
 		this();
 		this.empId       = empId;
 		this.percentage  = percentage;
@@ -30,7 +29,6 @@ public class ReimbursalForm {
 		this.description = description;
 		this.courseType  = courseType;
 		this.message     = message;
-		this.submitTime  = submitTime;
 	}
 	
 	/* Employee ID should not be modified.
@@ -87,8 +85,5 @@ public class ReimbursalForm {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	
-	public LocalDate getSubmitTime() {
-		return submitTime;
-	}
+
 }

@@ -28,7 +28,7 @@ public class ServiceImpl implements Service {
 		
 		public UserDef ValidateUser(String name, String password) {
 			UserDef u = dop.getUser(name);
-			log.trace(password + " -- " + u.getPassword());
+			//log.trace(password + " -- " + u.getPassword());
 			if (u == null) {
 				log.trace("User not registered!");
 				return null;

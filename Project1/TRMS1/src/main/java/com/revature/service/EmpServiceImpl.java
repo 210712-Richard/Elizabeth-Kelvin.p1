@@ -30,14 +30,27 @@ public class EmpServiceImpl implements EmpService {
 	public DataOps dop = (DataOps) BeanFactory.getFactory1().get(DataOps.class, DataOpsImpl.class);
 
 	
-	public boolean CreateAppForm(Integer empId, Double percent, Double paidTution, String manager,
-			              MarkSheet ms, String descrpt, String course,  String messg, LocalDate lt) {
+	public boolean CreateAppForm(Integer empId, Double percent, Double paidTuition, String manager,
+			              MarkSheet ms, String descrpt, String course,  String messg) {
 		UserDef u = dop.getUserWithId(empId);
 		if (u == null) {
 			log.trace("User not registered!");
 			return false;
 		}
-		ReimbursalForm f = new ReimbursalForm (empId, percent, paidTution, manager, ms, descrpt, course, messg, lt);
+		
+		if (ms == null) {
+			MarkSheet tmp = new MarkSheet();
+			tmp.setEmpId(empId);
+			tmp.setSubA("");
+			tmp.setSubB("");
+			tmp.setSubC("");
+			tmp.setSubD("");
+			ms = tmp;
+		}
+		if (messg == null) {
+			messg = "";
+		}
+		ReimbursalForm f = new ReimbursalForm (empId, percent, paidTuition, manager, ms, descrpt, course, messg);
 		dop.saveForm(f);
 		return true;
 	}
@@ -51,6 +64,7 @@ public class EmpServiceImpl implements EmpService {
 		
 		MarkSheet ms = new MarkSheet (empId, mrkA, mrkB, mrkC, mrkD);
 		f.setMarkSheet(empId, mrkA, mrkB, mrkC, mrkD);
+		dop.saveForm(f);
 		return true;
 	}
 	

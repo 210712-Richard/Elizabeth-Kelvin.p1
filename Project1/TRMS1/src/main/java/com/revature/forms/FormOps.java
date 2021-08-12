@@ -42,6 +42,7 @@ public class FormOps {
 			return null;
 		}
 		else {
+			log.trace("Collecting forms of reportees.");
 			List<UserDef> emps = dop.getAllEmployeesOf(name);
 			List<ReimbursalForm> fms = new ArrayList<ReimbursalForm> ();
 			for (UserDef ob : emps) {
@@ -105,11 +106,12 @@ public class FormOps {
 			return null;	
 		}
 		else {
+			log.trace("Collect forms that are eligible.");
 			List<ReimbursalForm> forms = getFormsOfReportees(u.getUsername());
 			for (ReimbursalForm f : forms) {
 				switch (this.isEligible(f.getEmpId())) {
 					case 0: f.setMessage("Form Empty."); break;
-					case 1: f.setMessage("Form Not Submitted. Submit again."); break;
+					case 1: needApprovForms.add(f); break;
 					case 2: break;  // Message already set 
 					case 3: f.setMessage("Rejected.Contact HR for details."); break;
 					case 4: f.setMessage("Approved."); break;

@@ -11,8 +11,10 @@ import io.javalin.plugin.json.JavalinJackson;
 public class Driver {
 	public  static void main(String[] args) {
 			
-	javalin();
-		
+	    javalin();
+	    // uncomment for creating table 
+		//DataBaseCreator.createTables();
+
 	}
 	public static void instantiateDatabase() {
 		DataBaseCreator.dropTables();
@@ -46,9 +48,9 @@ public class Driver {
 		app.post("/users", uc::login);	
 		app.put("/users/:username", uc::register);		
 		app.delete("/users", uc::logout);		
-		app.put("/users/:submitForm", uc::submitForm);
-		app.put("/users/:submitMark", uc::submitMark);
-		app.put("/users/:manageapproval", uc::manageApproval);
+		app.put("/users/:username/submitForm", uc::submitForm);
+		app.put("/users/:username/submitMark", uc::submitMark);
+		app.get("/users/:username/manageapproval", uc::manageApproval);
 		app.get("/users/:checkstatus", uc::checkStatus);
 	
 

@@ -33,9 +33,9 @@ public class DataBaseCreator {
 				.append("tuitionAmnt double, paymentStatus text, email text, manager text, netPaid double);");
 		CassandraUtil.getInstance().getSession().execute(sb.toString());
 		
-		sb = new StringBuilder("CREATE TABLE IF NOT EXISTS Forms ( ")
-				.append("empId int PRIMARY KEY, percentage double, paidTuition double, ")
-				.append(" manager text, message text, SubA text, SubB text, SubC text, SubD text, total float); ");
+		sb = new StringBuilder("CREATE TABLE IF NOT EXISTS Forms1 ( ")
+				.append("empId int PRIMARY KEY, percentage double, paidTuition double,")
+				.append(" manager text, marks  tuple<int, text, text, text, text>, description text, course text, message text);");
 		CassandraUtil.getInstance().getSession().execute(sb.toString());
 		
 		

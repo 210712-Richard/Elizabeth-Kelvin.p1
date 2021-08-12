@@ -3,6 +3,8 @@ package com.revature.controller;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.revature.data.DataOps;
+import com.revature.data.DataOpsImpl;
 import com.revature.factory1.BeanFactory;
 import com.revature.service.Service;
 import com.revature.service.ServiceImpl;
@@ -19,6 +21,7 @@ public class UserControllerImpl implements UserController {
 		private static Logger log = LogManager.getLogger(UserControllerImpl.class);
 		private Service us = (Service) BeanFactory.getFactory1().get(Service.class, ServiceImpl.class);
 		private EmpService es = (EmpService) BeanFactory.getFactory1().get(EmpService.class, EmpServiceImpl.class);
+		public DataOps dop = (DataOps) BeanFactory.getFactory1().get(DataOps.class, DataOpsImpl.class);
 
 		
 		
@@ -60,20 +63,22 @@ public class UserControllerImpl implements UserController {
 			String username = ctx.pathParam("username");
 			log.trace(ctx.body());
 			ReimbursalForm rf = ctx.bodyAsClass(ReimbursalForm.class);
+			log.trace(currentuser.getEmpId());
+			log.trace(rf.getEmpId());
 			if(currentuser == null || !currentuser.getUsername().equals(username)) {
 					ctx.status(403);
 					return;
 			}
-			else if (currentuser.getEmpId() != rf.getEmpId()){
-				// Safety concern, but in case user forgot empID you dont want to get stuck.
-				// Later implement with forgot Emp ID.
-				ctx.html("EMP ID mismatch. Your EmpId is :" + currentuser.getEmpId().toString());
+			else if (!currentuser.getEmpId().equals(rf.getEmpId())){
+				// Safety concern, but in case user forgot empID you do not want to get stuck.
+				// Later implement with forgot Employee ID.
+				ctx.html("EMP ID mismatch. Your EmpId is : " + currentuser.getEmpId().toString());
 			}
 			else {
-				// marksheet , message  and time is null. time = null as it is not handled. 
+				// MarkSheet , message  and time is null.
 			    if(es.CreateAppForm(rf.getEmpId(), rf.getPercent(), rf.getPaidTuition(),
 			    					rf.getManager(), null, rf.getDescription(),
-			    					rf.getcourseType(), null, null )) {
+			    					rf.getcourseType(), null )) {
 			    	ctx.html("Marks submitted successfully.");
 			    } else {
 					ctx.status(409);
@@ -88,11 +93,13 @@ public class UserControllerImpl implements UserController {
 			String username = ctx.pathParam("username");
 			log.trace(ctx.body());
 			MarkSheet mks = ctx.bodyAsClass(MarkSheet.class);
+			log.trace(currentuser.getUsername());
+			log.trace(username);
 			if(currentuser == null || !currentuser.getUsername().equals(username)) {
 					ctx.status(403);
 					return;
 			}
-			else if (currentuser.getEmpId() != mks.getEmpId()){
+			else if (!currentuser.getEmpId().equals(mks.getEmpId())){
 				// Safety concern, but in case user forgot empID you dont want to get stuck.
 				// Later implement with forgot Emp ID.
 				ctx.html("EMP ID mismatch. Your EmpId is :" + currentuser.getEmpId().toString());
@@ -125,7 +132,9 @@ public class UserControllerImpl implements UserController {
 					ctx.status(403);
 					return;
 			} else {
-				us.processApprovel(currentuser);
+				if(us.processApprovel(currentuser)) {
+					ctx.html("Approved.");
+				}
 			}
 		}
 		

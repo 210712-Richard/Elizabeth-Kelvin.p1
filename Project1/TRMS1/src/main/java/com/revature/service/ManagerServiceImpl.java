@@ -88,6 +88,7 @@ public class ManagerServiceImpl implements ManagerService {
 		String course = form.getcourseType().toLowerCase();
 		
 		if (form.getPercent() != form.getMarkSheet().getPercent()) {
+			log.trace("User not registered!");log.trace("User not registered!");
 			form.setMessage("Percent Mismatch. Upload the form again.");
 			Emp.setPaymentStatus(PaymentStatus.REJECTED);
 			return false;
