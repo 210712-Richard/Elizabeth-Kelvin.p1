@@ -47,8 +47,11 @@ public class FormOps {
 			List<ReimbursalForm> fms = new ArrayList<ReimbursalForm> ();
 			for (UserDef ob : emps) {
 				ReimbursalForm tmp = dop.getFormsOf(ob.getEmpId());
-				if ( tmp != null )
+				if ( tmp != null ) {
+					log.trace("USER EMP: " + ob.getUsername() + " ID : " + ob.getEmpId() + " status: " + ob.getPaymentStatus());
+			     	log.trace("Forms EMPID : " + tmp.getEmpId() + " ID : " + ob.getEmpId());
 					fms.add(tmp);
+				}
 			}
 			return fms;
 		}
@@ -79,7 +82,7 @@ public class FormOps {
 			else if (e.getPaymentStatus() == PaymentStatus.COMPLETED) {
 				return 4;
 			}
-			else if ( f.getPercent() < 90.0) {
+			else if ( f.getPercent() < 85.0) {
 				return 5;
 			}
 			else if ( e.getNetPaid() == 1000.0 ) {

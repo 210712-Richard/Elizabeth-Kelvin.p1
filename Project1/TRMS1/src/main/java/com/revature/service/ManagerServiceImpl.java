@@ -62,6 +62,9 @@ public class ManagerServiceImpl implements ManagerService {
 		UserDef mgr  = dop.getUser(name);
 		UserType pos = mgr.getUserType();
 		
+		log.trace("Checking Director has already approved.");
+		log.trace("DIR POS: " + pos.toString() + " EMP Pay STS: " + emp.getPaymentStatus().toString());
+
 		if (pos == UserType.DIRECTOR) {
 			if (emp.getPaymentStatus() == PaymentStatus.DIRECTOR_APPROVED) 
 				return true;
@@ -87,37 +90,46 @@ public class ManagerServiceImpl implements ManagerService {
 		UserDef Emp = dop.getUserWithId(form.getEmpId());
 		String course = form.getcourseType().toLowerCase();
 		
-		if (form.getPercent() != form.getMarkSheet().getPercent()) {
-			log.trace("User not registered!");log.trace("User not registered!");
+		if (!form.getPercent().equals(form.getMarkSheet().getPercent()) ) {
+			log.trace("Percent in form and percent from marks are not matching!");
+			log.trace("Percentage reported : " + form.getPercent());
+			log.trace("Percentage from marks : " + form.getMarkSheet().getPercent());
 			form.setMessage("Percent Mismatch. Upload the form again.");
 			Emp.setPaymentStatus(PaymentStatus.REJECTED);
+			dop.saveUser(Emp);
+			dop.saveForm(form);
 			return false;
 		}
-		if (form.getMarkSheet().getPercent() < 90.0) {
+		if (form.getMarkSheet().getPercent() < 85.0) {
 			form.setMessage("Percent didnt meet cutoff.");
 			Emp.setPaymentStatus(PaymentStatus.REJECTED);
+			dop.saveUser(Emp);
+			dop.saveForm(form);
 			return false;
 		}
-		if (( course != "university" && course != "seminar" && course != "certification")) {
+		if (!course.equals("university") && !course.equals("seminar") && !course.equals("certification")) {
+			log.trace("course not eligible for reimbursal!");
+			log.trace("course : " + form.getcourseType());
 			form.setMessage("Course not eligible for reimbursement.");
 			Emp.setPaymentStatus(PaymentStatus.MANAGER_SKIPPED);
+			dop.saveUser(Emp);
+			dop.saveForm(form);
 			return false;
 		}
 		
 		Emp.setPaymentStatus(PaymentStatus.MANAGER_APPROVED);
+		form.setMessage("Manager Approved");
+		dop.saveUser(Emp);
+		dop.saveForm(form);
 		return true;
 	}
+	
 	
 	public boolean approvalChecklistDirector(ReimbursalForm form) {
 
 		UserDef Emp = dop.getUserWithId(form.getEmpId());
 		String course = form.getcourseType().toLowerCase();
 		
-		// If employee is Manager or Director
-		if (Emp.getUserType() == UserType.DIRECTOR || Emp.getUserType() == UserType.MANAGER ) {
-			if(this.approvalChecklistManager(form))
-				Emp.setPaymentStatus(PaymentStatus.DIRECTOR_APPROVED);
-		}
 		
 		if ( Emp.getPaymentStatus() == PaymentStatus.MANAGER_SKIPPED ) {
 
@@ -125,7 +137,8 @@ public class ManagerServiceImpl implements ManagerService {
 				form.setMessage("Approving for the exceptional marks.");
 				return true;
 			}
-			else if(course == "coresera" || course == "udemy" || course == "linkdln") {
+			else if(course.equals("coresera") || course.equals("udemy")
+					|| course.equals("linkdln")) {
 				form.setMessage("Approving because of standard online course.");
 				return true;
 			}
@@ -136,42 +149,49 @@ public class ManagerServiceImpl implements ManagerService {
 			else {
 				form.setMessage("Course not eligible for reimbursement.");
 				Emp.setPaymentStatus(PaymentStatus.REJECTED);
+				dop.saveUser(Emp);
+				dop.saveForm(form);
 				return false;
 			}
 		}
 		
 		Emp.setPaymentStatus(PaymentStatus.DIRECTOR_APPROVED);
+		form.setMessage("Director Approved");
+		dop.saveUser(Emp);
+		dop.saveForm(form);
 		return true;
 	}
 	
 	
-	public boolean setApproval (UserDef f) {
+	public boolean setApproval (UserDef ud) {
 		
-		List <ReimbursalForm> approvalForms = fop.FormsNeedApproval(f.getUsername());
-		if (f.getUserType() == UserType.MANAGER) {
+		List <ReimbursalForm> approvalForms = fop.FormsNeedApproval(ud.getUsername());
+		if (ud.getUserType() == UserType.MANAGER) {
 			for (ReimbursalForm i : approvalForms) {
-					if (isManagerApproved(i.getEmpId(), f.getUsername())) {
+					if (isManagerApproved(i.getEmpId(), ud.getUsername())) {
 						continue;
 					}
 					else {
 						if (this.approvalChecklistManager(i)) {
-							// only success forward.
-							this.fwdApproval(i, f);
+							// only if success forward.
+							this.fwdApproval(i, ud);
 						}
 						// even if not success we need to save.
 						dop.saveForm(i);
 					}
 				}
 		}
-		if (f.getUserType() == UserType.DIRECTOR) {
+		if (ud.getUserType() == UserType.DIRECTOR) {
+			log.trace("Set Approval: Start Director Approval..");
 			for (ReimbursalForm i : approvalForms) {
-					if (isDirectorApproved(i.getEmpId(), f.getUsername())) {
+					if (isDirectorApproved(i.getEmpId(), ud.getUsername())) {
+						log.trace(" Director Approved already..");
 						continue;
 					}
 					else {
 						if (this.approvalChecklistDirector(i)) {
-							// only success forward.
-							this.fwdApproval(i,  f);
+							// only if success forward.
+							this.fwdApproval(i,  ud);
 						}
 						// even if not success we need to save.
 						dop.saveForm(i);

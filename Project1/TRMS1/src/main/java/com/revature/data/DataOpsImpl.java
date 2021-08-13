@@ -37,10 +37,10 @@ public class DataOpsImpl implements DataOps{
 	
 	public UserDef addUser(String username, String password, String email, UserType userType, String manager) {
 		
-		Integer EmpID = 1004 + this.getUsers().size();
+		Integer EmpID = 1006 + this.getUsers().size();
 		String query = "Insert into Employees (username, userType, email,"
 				+ " empId, manager, password, paymentstatus, tuitionamnt,"
-				+ " netPaid) values (?, ?, ?, ?, ?, ?,?, ?, ?);";
+				+ " netPaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?);";
 		
 		SimpleStatement s = new SimpleStatementBuilder(query)
 				.setConsistencyLevel(DefaultConsistencyLevel.LOCAL_QUORUM).build();
@@ -71,8 +71,12 @@ public class DataOpsImpl implements DataOps{
 			u.setPassword(row.getString("password"));
 			u.setPaymentStatus(PaymentStatus.valueOf(row.getString("paymentStatus")));
 			u.setTuitionAmnt(row.getDouble("tuitionAmnt"));
-			u.setTuitionAmnt(row.getDouble("netPaid"));
-
+			try {
+				u.setNetPaid(row.getDouble("netPaid"));
+			}
+			catch (NullPointerException e){
+				u.setNetPaid(0.0);
+			}
 			users.add(u);
 		});
 		return users;
@@ -99,16 +103,21 @@ public class DataOpsImpl implements DataOps{
 		u.setManager(row.getString("manager"));
 		u.setPassword(row.getString("password"));
 		u.setTuitionAmnt(row.getDouble("tuitionamnt"));
-		u.setTuitionAmnt(row.getDouble("netPaid"));
 		u.setUserType(UserType.valueOf(row.getString("userType")));
 		u.setPaymentStatus(PaymentStatus.valueOf(row.getString("paymentstatus")));
 
+		try {
+			u.setNetPaid(row.getDouble("netPaid"));
+		}
+		catch (NullPointerException e){
+			u.setNetPaid(0.0);
+		}
+		
 		return u;
 	}
 	
 	
 	public  UserDef getUserWithId(Integer EmpId) {	
-		log.trace("Coming Here");
 		String query = "Select username, userType, email, manager, password, paymentStatus, tuitionAmnt, netPaid from Employees  where empId = ? ALLOW FILTERING";
 		SimpleStatement s = new SimpleStatementBuilder(query).build();
 		BoundStatement bound = session.prepare(s).bind(EmpId);
@@ -127,8 +136,17 @@ public class DataOpsImpl implements DataOps{
 		u.setPassword(row.getString("password"));
 		u.setPaymentStatus(PaymentStatus.valueOf(row.getString("paymentStatus")));
 		u.setTuitionAmnt(row.getDouble("tuitionAmnt"));
-		u.setTuitionAmnt(row.getDouble("netPaid"));
-        return u;
+		
+		try {
+			log.trace("getUserWithId : 1. " + row.getString("username") + " 2. " + UserType.valueOf(row.getString("userType")) + " 3. " + row.getString("email") +  " 4. " + EmpId + " 5. " + row.getString("manager")
+		           + " 6. " + row.getString("password") + " 7." + PaymentStatus.valueOf(row.getString("paymentStatus")) + " 8. " + row.getDouble("tuitionAmnt") + " 9. " + row.getDouble("netPaid"));
+
+			u.setNetPaid(row.getDouble("netPaid"));
+		}
+		catch (NullPointerException e){
+			u.setNetPaid(0.0);
+		}
+		return u;
 	}	
 	
 	
@@ -147,20 +165,6 @@ public class DataOpsImpl implements DataOps{
 		return u;
 	}
 
-	
-	/*
-	public List<UserDef> getAllEmployeesOf(String manager) {
-		String query = "Select * from Employees where manager=?";
-		SimpleStatement s = new SimpleStatementBuilder(query).build();
-		BoundStatement bound = session.prepare(s).bind(manager);
-		ResultSet rs = session.execute(bound);
-		Row row = rs.one();
-		if(row == null) {
-			return null;
-		}
-		List<UserDef> getAllEmployees = row.getList(manager, UserDef.class);
-		return getAllEmployees;
-	}*/
 	
 	
 	public List<UserDef> getAllEmployeesOf(String manager) {
@@ -181,8 +185,12 @@ public class DataOpsImpl implements DataOps{
 			u.setPassword(row.getString("password"));
 			u.setPaymentStatus(PaymentStatus.valueOf(row.getString("paymentStatus")));
 			u.setTuitionAmnt(row.getDouble("tuitionAmnt"));
-			u.setTuitionAmnt(row.getDouble("netPaid"));
-
+			try {
+				u.setNetPaid(row.getDouble("netPaid"));
+			}
+			catch (NullPointerException e){
+				u.setNetPaid(0.0);
+			}
 			users.add(u);
 		});
 		return users;
@@ -238,13 +246,15 @@ public class DataOpsImpl implements DataOps{
 		ReimbursalForm f = new ReimbursalForm(EmpId, row.getDouble("percentage"), row.getDouble("paidTuition"),
 				row.getString("manager"), marksheet, row.getString("description"),
 				row.getString("course"), row.getString("message"));
-		
+		log.trace("getFormsOf: " + f);
 		return f;
 	} 
 	
 	
 	public  ReimbursalForm saveForm(ReimbursalForm f) {	
 		MarkSheet m = f.getMarkSheet();
+		UserDef ud = this.getUserWithId(f.getEmpId());
+
 		TupleValue marks = MARKS_TUPLE
 				.newValue(m.getEmpId(), m.getSubA(), m.getSubB(), m.getSubC(), m.getSubD());
 		String query = "update Forms1 set course = ?, description = ?, manager = ?,"
@@ -252,19 +262,25 @@ public class DataOpsImpl implements DataOps{
 		
 		SimpleStatement s = new SimpleStatementBuilder(query)
 				.setConsistencyLevel(DefaultConsistencyLevel.LOCAL_QUORUM).build();
-		log.trace(" " + f.getcourseType() + " " + f.getDescription() + " " + f.getManager() + " " + f.getMessage());
-		log.trace(marks.get(0, Integer.class));
-		log.trace(marks.get(1, String.class));
+		
+		log.trace(" " + f.getcourseType() + " " + f.getDescription() 
+				+ " " + f.getManager() + " " + f.getMessage());
 
 		if (f.getPaidTuition() > 0.0) {
-			UserDef ud = this.getUserWithId(f.getEmpId());
 			ud.setTuitionAmnt(f.getPaidTuition());
+			ud.setManager(f.getManager());
+			log.trace("Save Form , Status: " + ud.getPaymentStatus());
 			UserDef tmp = this.saveUser(ud);
 		}
 		
+		// handle re-submission if already rejected
+		if (ud.getPaymentStatus() == PaymentStatus.REJECTED && f.getMessage() == null) {
+			ud.setPaymentStatus(PaymentStatus.NONE);
+		}
+
 		BoundStatement bound = session.prepare(s)
-				.bind(f.getcourseType(), f.getDescription(),  f.getManager(),
-						marks, f.getMessage(), f.getPaidTuition(), f.getPercent(), f.getEmpId());
+			.bind(f.getcourseType(), f.getDescription(),  f.getManager(),
+			marks, f.getMessage(), f.getPaidTuition(), f.getPercent(), f.getEmpId());
 		
 		session.execute(bound);
 		return f;
@@ -273,5 +289,4 @@ public class DataOpsImpl implements DataOps{
 
 
 
-		
 }

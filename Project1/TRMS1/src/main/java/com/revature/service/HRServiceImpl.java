@@ -47,18 +47,18 @@ public class HRServiceImpl implements HRService {
 			form.setMessage("Awaiting Director Approval.");
 			return false;
 		}
-		if (form.getPercent() != form.getMarkSheet().getPercent()) {
+		if (!form.getPercent().equals(form.getMarkSheet().getPercent())) {
 			form.setMessage("Percent Mismatch. Upload the form again.");
 			Emp.setPaymentStatus(PaymentStatus.REJECTED);
 			return false;
 		}
-		if (form.getMarkSheet().getPercent() < 90.0) {
+		if (form.getMarkSheet().getPercent() < 85.0) {
 			form.setMessage("Percent didnt meet cutoff.");
 			Emp.setPaymentStatus(PaymentStatus.REJECTED);
 			return false;
 		}
-		if (( course != "university" && course != "seminar" && course != "certification"
-				&& Emp.getPaymentStatus() !=  PaymentStatus.DIRECTOR_APPROVED ) ) {
+		if ( !course.equals("university") && !course.equals("seminar") && !course.equals("certification")
+				&& Emp.getPaymentStatus() !=  PaymentStatus.DIRECTOR_APPROVED )  {
 			
 			form.setMessage("Course not eligible for reimbursement.");
 			Emp.setPaymentStatus(PaymentStatus.REJECTED);
@@ -91,11 +91,14 @@ public class HRServiceImpl implements HRService {
 	}
 	
 	
-	public void completePayment(ReimbursalForm f, Double amount) {
+	public boolean completePayment(ReimbursalForm f, Double tamount) {
 		UserDef emp  = dop.getUserWithId(f.getEmpId());
-		f.setMessage("Congrats. Reimbursement approved for $" + amount.toString());
+		f.setMessage("Congrats. Reimbursement approved for $" + tamount.toString());
 		emp.setPaymentStatus(PaymentStatus.COMPLETED);
-		emp.setNetPaid(emp.getNetPaid() + amount);
+		emp.setNetPaid(emp.getNetPaid() + tamount);
+		dop.saveForm(f);
+		dop.saveUser(emp);
+		return true;
 	}
 	
 	
@@ -103,9 +106,9 @@ public class HRServiceImpl implements HRService {
 		// what all needs to be set ?
 		// employee payment status with appropriate level
 		// change manger in form to next level 
-		// If HR set employee payment staus and reimburse the amount
-		// this invloves setting the net amount also , validate empID
-		Double amount = 0.0;
+		// If HR set employee payment status and reimbursed the amount
+		// this involves setting the net amount also , validate empID
+		Double ramount = 0.0;
 		List <ReimbursalForm> approvalForms = fop.FormsNeedApproval(f.getUsername());
 		if (f.getUserType() == UserType.HR) {
 			for (ReimbursalForm i : approvalForms) {
@@ -114,8 +117,8 @@ public class HRServiceImpl implements HRService {
 					}
 					else {
 						if (this.approvalChecklist(i)) {
-							amount = this.getReimburseAmount(i);
-							this.completePayment(i, amount);
+							ramount = this.getReimburseAmount(i);
+							this.completePayment(i, ramount);
 						}
 						// even if not success we need to save.
 						dop.saveForm(i);

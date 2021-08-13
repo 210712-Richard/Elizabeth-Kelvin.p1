@@ -8,6 +8,6 @@ public interface HRService {
 	boolean isApproved(Integer EmpId);
 	boolean approvalChecklist(ReimbursalForm form);
 	Double getReimburseAmount(ReimbursalForm f);
-	void completePayment(ReimbursalForm f, Double amount);
+	boolean completePayment(ReimbursalForm f, Double amount);
 	boolean setApproval (UserDef f);
 }

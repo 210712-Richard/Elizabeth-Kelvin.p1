@@ -51,7 +51,7 @@ public class Driver {
 		app.put("/users/:username/submitForm", uc::submitForm);
 		app.put("/users/:username/submitMark", uc::submitMark);
 		app.get("/users/:username/manageapproval", uc::manageApproval);
-		app.get("/users/:checkstatus", uc::checkStatus);
+		app.get("/users/:username/checkstatus", uc::checkStatus);
 	
 
 	}

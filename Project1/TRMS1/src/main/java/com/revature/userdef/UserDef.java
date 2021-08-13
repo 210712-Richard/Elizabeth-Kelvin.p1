@@ -24,7 +24,7 @@ public class UserDef implements Serializable {
 	
 	public UserDef(Integer empId, String username, String password,
 			       String email, UserType userType, String manager,
-			       Double tuitionAmnt, PaymentStatus paymentStatus) {
+			       Double tuitionAmnt, PaymentStatus paymentStatus, Double netPaid) {
 		this();
 		this.empId         = empId;
 		this.email         = email;
@@ -34,6 +34,7 @@ public class UserDef implements Serializable {
 		this.paymentStatus = paymentStatus;
 		this.userType      = userType;
 		this.manager       = manager;
+		this.netPaid       = netPaid;
 	}
 	
 	
@@ -106,7 +107,7 @@ public class UserDef implements Serializable {
 	}
 	
 	public void setNetPaid(Double netPaid) {
-		if (netPaid == 0) 
+		if (netPaid == 0.0) 
 			this.netPaid = 0.0;
 		else if (this.netPaid + netPaid >= 1000.0)
 			this.netPaid = 1000.0;
