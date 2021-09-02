@@ -2,22 +2,55 @@
 
 **TRMS Web Service**
 
-The Tuition Reimbursement System, TRMS, allows users to submit reimbursements for courses and training. The submitted reimbursement must be approved by that employee's supervisor, department head, and benefits coordinator. The benefits coordinator then reviews the grade received before finalizing the reimbursement.
+The Tuition Reimbursement System, TRMS, allows employees to submit reimbursements for courses and training. The submitted reimbursement must be approved by that employee's Manager, Director, and HR subsequently. The HR then reviews necessary information received before finalizing the reimbursement.
+The TRMS system has an automatic approval process where information submitted by employees will be approved or rejected automatically by their Direct supervisors.
 
 **Technologies Used**
 
-*Java 
 
-*REST Services
+  * Java 
+  
+  * REST Services
 
-*JUnit 
+  * JUnit 
 
-*Log4J 
+  * Log4J 
 
-*Postman 
+  * Postman 
 
-*NoSQL 
+  * NoSQL 
 
-*AWS S3
+  * AWS S3
+
+**Features**
+
+**All employees can**
+
+
+* Login
+
+* Register
+
+* Logout
+
+* Submit Approval Form/MarkSheet
+
+* Resubmit Forms
+
+* Check Status
+
+**Manager/Director can**
+
+* Approve Submitted Information
+
+* Check Status 
+
+**HR can**
+
+* Approve Submitted Information
+ 
+* Approve Reimbursement.
+
+
 
 
