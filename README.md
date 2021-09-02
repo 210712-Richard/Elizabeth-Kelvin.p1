@@ -3,7 +3,7 @@
 **TRMS Web Service**
 
 The Tuition Reimbursement System, TRMS, allows employees to submit reimbursements for courses and training. The submitted reimbursement must be approved by that employee's Manager, Director, and HR subsequently. The HR then reviews necessary information received before finalizing the reimbursement.
-The TRMS system has an automatic approval process where information submitted by employees will be approved or rejected automatically by their Direct supervisors.
+The TRMS system has an automatic approval process where information submitted by employees will be approved or rejected automatically based on the certain criteria,by their Direct supervisors.
 
 **Technologies Used**
 
